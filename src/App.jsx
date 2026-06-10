@@ -186,8 +186,8 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4 font-semibold">
           <span>&copy; {new Date().getFullYear()} Sri Lankan Life Hub. All rights reserved.</span>
           <div className="flex gap-4">
-            <span>Powered by React + Vite + Tailwind CSS</span>
-            <span>&bull;</span>
+            {/* <span>Powered by React + Vite + Tailwind CSS</span>
+            <span>&bull;</span> */}
            <span className="text-teal-400 light-mode:text-teal-600">
   Developed by{' '}
   <a 

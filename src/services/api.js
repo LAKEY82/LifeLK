@@ -55,7 +55,7 @@ const getMockFuelStations = () => [
 ];
 
 const getMockHolidays = () => [
-  { date: '2026-01-01', name: 'Duruthu Full Moon Poya Day', type: 'Public, Bank, Mercantile' },
+  { date: '2026-01-03', name: 'Duruthu Full Moon Poya Day', type: 'Buddhist' },
   { date: '2026-01-14', name: 'Tamil Thai Pongal Day', type: 'Public, Bank, Mercantile' },
   { date: '2026-02-04', name: 'Independence Day', type: 'Public, Bank, Mercantile' },
   { date: '2026-03-01', name: 'Medin Full Moon Poya Day', type: 'Public, Bank, Mercantile' },
@@ -79,7 +79,7 @@ export const fetchWeather = async (city = 'Colombo') => {
     );
     if (!response.ok) throw new Error(`Weather fetch failed: ${response.statusText}`);
     const data = await response.json();
-    cacheSet(cacheKey, data, 600000); // Cache for 10 minutes
+    cacheSet(cacheKey, data, 600000); 
     return data;
   } catch (error) {
     console.error('Weather API error, using fallback:', error);
@@ -167,7 +167,7 @@ export const fetchFuelStatus = async (apiKey = '') => {
       prices: prices || getMockFuelPrices(),
       stations: stations || getMockFuelStations()
     };
-    cacheSet(cacheKey, data, 180000); // Cache for 3 minutes
+    cacheSet(cacheKey, data, 180000); 
     return data;
   } catch (error) {
     console.error('Fuel API error, using detailed mock fallbacks:', error);
@@ -179,7 +179,7 @@ export const fetchFuelStatus = async (apiKey = '') => {
 };
 
 /**
- * HOLIDAY API
+ * HOLIDAY API (Updated to parse induwara.lk payload correctly)
  */
 export const fetchHolidays = async () => {
   const cacheKey = 'holidays_data';
@@ -197,19 +197,20 @@ export const fetchHolidays = async () => {
       throw new Error(`Holiday fetch failed: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const resBody = await response.json();
     
-    // Ensure data is structured as an array before sorting
-    if (!Array.isArray(data)) {
-      throw new Error("Invalid holiday data format received");
+    // Extract the payload array nested inside resBody.data.holidays
+    const holidayList = resBody?.data?.holidays;
+
+    if (!holidayList || !Array.isArray(holidayList)) {
+      throw new Error("Invalid structure or empty holiday array from response");
     }
 
-    const sorted = data.sort((a, b) => new Date(a.date) - new Date(b.date));
+    const sorted = holidayList.sort((a, b) => new Date(a.date) - new Date(b.date));
     cacheSet(cacheKey, sorted, 86400000); // 24 hours
     return sorted;
   } catch (error) {
-    console.error('Holiday API error, returning highly accurate local mock data:', error);
-    // CRITICAL FIX: Returning structured mock data instead of an empty array [] to avoid dashboard runtime UI crashes
+    console.error('Holiday API parsing layout failed. Using mock defaults:', error);
     return getMockHolidays(); 
   }
 };
@@ -229,7 +230,7 @@ export const fetchExchangeRates = async () => {
     if (data.rates && data.rates.LKR) {
       const rate = data.rates.LKR;
       const payload = { rate, provider: 'ExchangeRate.host' };
-      cacheSet(cacheKey, payload, 3600000); // 1 hour cache
+      cacheSet(cacheKey, payload, 3600000); 
       return payload;
     }
     throw new Error('Rates missing in response');
@@ -258,7 +259,8 @@ export const fetchExchangeRates = async () => {
  */
 export const fetchCrypto = async () => {
   const cacheKey = 'crypto_data';
-  const cached = cacheGet(key => cacheKey); // Safe key target fixed
+  // FIX: Fixed callback error (key => cacheKey) which broke local caching structures
+  const cached = cacheGet(cacheKey); 
   if (cached) return cached;
 
   try {
@@ -273,7 +275,7 @@ export const fetchCrypto = async () => {
       solana: { lkr: data.solana.lkr, usd: data.solana.usd, change: data.solana.usd_24h_change },
       binancecoin: { lkr: data.binancecoin.lkr, usd: data.binancecoin.usd, change: data.binancecoin.usd_24h_change }
     };
-    cacheSet(cacheKey, formatted, 300000); // 5 minutes cache
+    cacheSet(cacheKey, formatted, 300000); 
     return formatted;
   } catch (error) {
     console.error('CoinGecko rate limited or failed, using cache/mock:', error);
@@ -311,7 +313,7 @@ export const fetchEarthquakes = async () => {
       depth: f.geometry.coordinates[2]
     }));
     
-    cacheSet(cacheKey, events, 600000); // Cache for 10 minutes
+    cacheSet(cacheKey, events, 600000); 
     return events;
   } catch (error) {
     console.error('USGS Earthquake API error, returning realistic mock details:', error);
