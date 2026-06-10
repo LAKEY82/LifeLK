@@ -188,7 +188,17 @@ export default function App() {
           <div className="flex gap-4">
             <span>Powered by React + Vite + Tailwind CSS</span>
             <span>&bull;</span>
-            <span className="text-teal-400 light-mode:text-teal-600">Vercel Deployment Ready</span>
+           <span className="text-teal-400 light-mode:text-teal-600">
+  Developed by{' '}
+  <a 
+    href="https://www.lakinduperera.pro/" 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    className="underline hover:text-teal-300 light-mode:hover:text-teal-500 transition-colors"
+  >
+    Lakindu
+  </a>
+</span>
           </div>
         </div>
       </footer>
